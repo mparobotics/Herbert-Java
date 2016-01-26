@@ -24,9 +24,9 @@ public class Robot extends IterativeRobot {
     Joystick rightStick;
     double rightInput;
     
-    DoubleSolenoid mainLift; //The main giant cyllander
-    DoubleSolenoid sideLiftR; //The right side cyllinder
-    DoubleSolenoid sideLiftL; //The left side cyllander
+    DoubleSolenoid mainLift; //The main giant cylinder
+    DoubleSolenoid sideLiftR; //The right side cylinder
+    DoubleSolenoid sideLiftL; //The left side cylinder
     
     final int ID = 0; //ID number of the PCM (pnuematics control moduel)
     final int liftForward = 0; //These need to be the channel numbers on the PCM (only like this so we can write other code)
@@ -42,7 +42,7 @@ public class Robot extends IterativeRobot {
     	talon_FR = new Talon(2);
     	talon_BR = new Talon(3);
     	driveSystem = new RobotDrive(talon_FR, talon_BR, talon_FR, talon_BR);
-    	armWheels = new Talon(4);
+    	armWheels = new Talon(9);
     	mysteryTalon = new Talon(5);
     	
     	leftStick = new Joystick(0);
