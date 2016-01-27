@@ -1,14 +1,16 @@
 
 package org.usfirst.frc.team3926.robot;
 
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
 	
 	
-
 public class Robot extends IterativeRobot {
 	Talon talon_FL;
 	Talon talon_BL;
@@ -24,9 +26,10 @@ public class Robot extends IterativeRobot {
     Joystick rightStick;
     double rightInput;
     
-    DoubleSolenoid mainLift; //The main giant cylinder
-    DoubleSolenoid sideLiftR; //The right side cylinder
-    DoubleSolenoid sideLiftL; //The left side cylinder
+    Compressor compressor;
+    DoubleSolenoid mainLift; //The main giant cyllander
+    DoubleSolenoid sideLiftR; //The right side cyllinder
+    DoubleSolenoid sideLiftL; //The left side cyllander
     
     final int ID = 0; //ID number of the PCM (pnuematics control moduel)
     final int liftForward = 0; //These need to be the channel numbers on the PCM (only like this so we can write other code)
@@ -43,11 +46,11 @@ public class Robot extends IterativeRobot {
     	talon_BR = new Talon(3);
     	driveSystem = new RobotDrive(talon_FR, talon_BR, talon_FR, talon_BR);
     	armWheels = new Talon(9);
-    	mysteryTalon = new Talon(5);
     	
     	leftStick = new Joystick(0);
     	rightStick = new Joystick(1);
     	
+    	compressor = new Compressor(ID);
     	mainLift = new DoubleSolenoid(ID, liftForward, liftReverse);
     	sideLiftR = new DoubleSolenoid(ID, rSideForward, rSideReverse);
     	sideLiftL = new DoubleSolenoid(ID, lSideForward, lSideReverse);
@@ -66,8 +69,48 @@ public class Robot extends IterativeRobot {
         if (leftStick.getRawButton(1)) rightInput = leftInput;
         
         driveSystem.tankDrive(leftInput, rightInput);
+        
+        if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO impliment the limit switch
+        if (rightStick.getRawButton(2)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO impliment the limti switch
+        else solenoidControl(DoubleSolenoid.Value.kOff);
     }  
     ////End teleopPeriodic()////
+    
+    /**
+     * @param value: The value to set all solenoids to (forward, reverse, or off);
+     */
+    public void solenoidControl(Value value) {
+    	mainLift.set(value);
+    	sideLiftR.set(value);
+    	sideLiftL.set(value);
+    }
+    ////End solenoidControl()////
+    
+    int debounceCounter = 0;
+    /**
+     * @param limitSwitch: The name of the limit switch which we are looking at
+     * @param joystick: The name of the joystick who's button we will check
+     * @param button: the button on the joystick which we will check
+     * @return If true, the limit switch is actually pressed and the joystick is actually pressed
+     */
+    public boolean debounceLimit(DigitalInput limitSwitch, Joystick joystick, int button) {
+    	boolean check = false;
+    	
+    	if (joystick.getRawButton(button)) {
+    		if (limitSwitch.get()) ++debounceCounter;
+    		else debounceCounter = 0;
+    		
+    		if (debounceCounter > 20) check = true;
+    		else check = false;
+    	}
+    	else {
+    		check = false;
+    		debounceCounter = 0;
+    	}
+    	
+    	return check;
+    }
+    ////End debounceLimit()////
     
     public double leftStickReturn() {return leftStick.getY();}
     ////End leftStickReturn()////
