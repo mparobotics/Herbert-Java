@@ -26,34 +26,35 @@ public class Robot extends IterativeRobot {
     Joystick rightStick;
     double rightInput;
     
-    Compressor compressor;
+  /*  Compressor compressor;
     DoubleSolenoid mainLift; //The main giant cyllander
     DoubleSolenoid sideLiftR; //The right side cyllinder
-    DoubleSolenoid sideLiftL; //The left side cyllander
+    DoubleSolenoid sideLiftL; //The left side cyllander */
     
-    final int ID = 0; //ID number of the PCM (pnuematics control moduel)
+    /*final int ID = 0; //ID number of the PCM (pnuematics control moduel)
     final int liftForward = 0; //These need to be the channel numbers on the PCM (only like this so we can write other code)
     final int liftReverse = 0;
     final int rSideForward = 0;
     final int rSideReverse = 0;
     final int lSideForward = 0;
-    final int lSideReverse = 0;
+    final int lSideReverse = 0;*/
 	
     public void robotInit() {
     	talon_FL = new Talon(0);
     	talon_BL = new Talon(1);
     	talon_FR = new Talon(2);
     	talon_BR = new Talon(3);
-    	driveSystem = new RobotDrive(talon_FR, talon_BR, talon_FR, talon_BR);
-    	armWheels = new Talon(9);
+    	driveSystem = new RobotDrive(talon_FL, talon_BL, talon_FR, talon_BR);
+    	armWheels = new Talon(8);
     	
     	leftStick = new Joystick(0);
     	rightStick = new Joystick(1);
     	
-    	compressor = new Compressor(ID);
+    	/*compressor = new Compressor(ID);
+    	compressor.setClosedLoopControl(true);
     	mainLift = new DoubleSolenoid(ID, liftForward, liftReverse);
     	sideLiftR = new DoubleSolenoid(ID, rSideForward, rSideReverse);
-    	sideLiftL = new DoubleSolenoid(ID, lSideForward, lSideReverse);
+    	sideLiftL = new DoubleSolenoid(ID, lSideForward, lSideReverse);*/
     } 
     ////End robotInit()////
 
@@ -63,27 +64,32 @@ public class Robot extends IterativeRobot {
     ////End autonomousPeriodic()////
 
     public void teleopPeriodic() {
-        if (rightStickReturn() < .6) rightInput = rightStickReturn()*rightStickReturn();
-        if (leftStickReturn() < .6) leftInput = leftStickReturn()*leftStickReturn();
+        rightInput = rightStickReturn();
+        leftInput = leftStickReturn();
         
         if (leftStick.getRawButton(1)) rightInput = leftInput;
         
         driveSystem.tankDrive(leftInput, rightInput);
         
-        if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO impliment the limit switch
-        if (rightStick.getRawButton(2)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO impliment the limti switch
-        else solenoidControl(DoubleSolenoid.Value.kOff);
+       /* if (leftStick.getRawButton(2)) armWheels.set(1);
+        else if (leftStick.getRawButton(3)) armWheels.set(-1);
+        else armWheels.set(0);
+        */
+        
+        armWheels.set(.3);
+        //if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO impliment the limit switch
+        //if (rightStick.getRawButton(2)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO impliment the limti switch
+        //else solenoidControl(DoubleSolenoid.Value.kOff);
     }  
     ////End teleopPeriodic()////
-    
     /**
      * @param value: The value to set all solenoids to (forward, reverse, or off);
      */
-    public void solenoidControl(Value value) {
+   /* public void solenoidControl(Value value) {
     	mainLift.set(value);
     	sideLiftR.set(value);
     	sideLiftL.set(value);
-    }
+    }*/
     ////End solenoidControl()////
     
     int debounceCounter = 0;
@@ -93,7 +99,7 @@ public class Robot extends IterativeRobot {
      * @param button: the button on the joystick which we will check
      * @return If true, the limit switch is actually pressed and the joystick is actually pressed
      */
-    public boolean debounceLimit(DigitalInput limitSwitch, Joystick joystick, int button) {
+   /* public boolean debounceLimit(DigitalInput limitSwitch, Joystick joystick, int button) {
     	boolean check = false;
     	
     	if (joystick.getRawButton(button)) {
@@ -109,13 +115,12 @@ public class Robot extends IterativeRobot {
     	}
     	
     	return check;
-    }
+    }*/
     ////End debounceLimit()////
-    
-    public double leftStickReturn() {return leftStick.getY();}
+    public double leftStickReturn() {return leftStick.getY() * -1;}
     ////End leftStickReturn()////
     
-    public double rightStickReturn() {return rightStick.getY();}
+    public double rightStickReturn() {return rightStick.getY() * -1;}
     ////End rightStickReturn()////
 } 
 ////End Robot////
