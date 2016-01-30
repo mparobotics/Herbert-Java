@@ -71,12 +71,10 @@ public class Robot extends IterativeRobot {
         
         driveSystem.tankDrive(leftInput, rightInput);
         
-       /* if (leftStick.getRawButton(2)) armWheels.set(1);
+        if (leftStick.getRawButton(2)) armWheels.set(1);
         else if (leftStick.getRawButton(3)) armWheels.set(-1);
         else armWheels.set(0);
-        */
         
-        armWheels.set(.3);
         //if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO impliment the limit switch
         //if (rightStick.getRawButton(2)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO impliment the limti switch
         //else solenoidControl(DoubleSolenoid.Value.kOff);
