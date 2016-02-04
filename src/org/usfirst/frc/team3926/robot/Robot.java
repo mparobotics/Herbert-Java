@@ -27,6 +27,7 @@ public class Robot extends IterativeRobot {
     Joystick rightStick;
     double rightInput;
     
+<<<<<<< HEAD
     Compressor compressor;
     DoubleSolenoid mainLift; //The main giant cylinder
     DoubleSolenoid sideLiftR; //The right side cylinder
@@ -39,6 +40,20 @@ public class Robot extends IterativeRobot {
     final int rSideReverse = 3;
     final int lSideForward = 6;
     final int lSideReverse = 1;
+=======
+  /*  Compressor compressor;
+    DoubleSolenoid mainLift; //The main giant cyllander
+    DoubleSolenoid sideLiftR; //The right side cyllinder
+    DoubleSolenoid sideLiftL; //The left side cyllander */
+    
+    /*final int ID = 0; //ID number of the PCM (pnuematics control moduel)
+    final int liftForward = 0; //These need to be the channel numbers on the PCM (only like this so we can write other code)
+    final int liftReverse = 0;
+    final int rSideForward = 0;
+    final int rSideReverse = 0;
+    final int lSideForward = 0;
+    final int lSideReverse = 0;*/
+>>>>>>> origin/master
 	
     public void robotInit() {
     	talon_FL = new Talon(0);
@@ -51,11 +66,15 @@ public class Robot extends IterativeRobot {
     	leftStick = new Joystick(0);
     	rightStick = new Joystick(1);
     	
+<<<<<<< HEAD
     	compressor = new Compressor(ID);
+=======
+    	/*compressor = new Compressor(ID);
+>>>>>>> origin/master
     	compressor.setClosedLoopControl(true);
     	mainLift = new DoubleSolenoid(ID, liftForward, liftReverse);
     	sideLiftR = new DoubleSolenoid(ID, rSideForward, rSideReverse);
-    	sideLiftL = new DoubleSolenoid(ID, lSideForward, lSideReverse);
+    	sideLiftL = new DoubleSolenoid(ID, lSideForward, lSideReverse);*/
     } 
     ////End robotInit()////
 
@@ -77,6 +96,7 @@ public class Robot extends IterativeRobot {
         else armWheels.set(0);
         
 <<<<<<< HEAD
+<<<<<<< HEAD
         
         if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO implement the limit switch
         else if (leftStick.getRawButton(1)) {
@@ -90,16 +110,29 @@ public class Robot extends IterativeRobot {
         //if (rightStick.getRawButton(2)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO impliment the limti switch
         //else solenoidControl(DoubleSolenoid.Value.kOff);
 >>>>>>> origin/master
+=======
+        //if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO impliment the limit switch
+        //if (rightStick.getRawButton(2)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO impliment the limti switch
+        //else solenoidControl(DoubleSolenoid.Value.kOff);
+>>>>>>> origin/master
     }  
     ////End teleopPeriodic()////
     /**
      * @param value: The value to set all solenoids to (forward, reverse, or off);
      */
+<<<<<<< HEAD
    public void solenoidControl(Value value) {
     	//mainLift.set(value);
     	sideLiftR.set(value);
     	sideLiftL.set(value);
     }
+=======
+   /* public void solenoidControl(Value value) {
+    	mainLift.set(value);
+    	sideLiftR.set(value);
+    	sideLiftL.set(value);
+    }*/
+>>>>>>> origin/master
     ////End solenoidControl()////
     
     int debounceCounter = 0;
@@ -109,7 +142,11 @@ public class Robot extends IterativeRobot {
      * @param button: the button on the joystick which we will check
      * @return If true, the limit switch is actually pressed and the joystick is actually pressed
      */
+<<<<<<< HEAD
     public boolean debounceLimit(DigitalInput limitSwitch, Joystick joystick, int button) {
+=======
+   /* public boolean debounceLimit(DigitalInput limitSwitch, Joystick joystick, int button) {
+>>>>>>> origin/master
     	boolean check = false;
     	
     	if (joystick.getRawButton(button)) {
@@ -125,7 +162,11 @@ public class Robot extends IterativeRobot {
     	}
     	
     	return check;
+<<<<<<< HEAD
     }
+=======
+    }*/
+>>>>>>> origin/master
     ////End debounceLimit()////
     public double leftStickReturn() {return leftStick.getY() * -1;}
     ////End leftStickReturn()////
