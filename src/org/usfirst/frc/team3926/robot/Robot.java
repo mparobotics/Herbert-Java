@@ -78,7 +78,6 @@ public class Robot extends IterativeRobot {
         
         
         if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO implement the limit switch
-<<<<<<< HEAD
         else if (rightStick.getRawButton(4)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO implement the limit switch
         else if (leftStick.getRawButton(1)) mainLift.set(DoubleSolenoid.Value.kForward);
         else if (leftStick.getRawButton(4)) mainLift.set(DoubleSolenoid.Value.kReverse);
@@ -86,25 +85,13 @@ public class Robot extends IterativeRobot {
         	solenoidControl(DoubleSolenoid.Value.kOff);
         	mainLift.set(DoubleSolenoid.Value.kOff);
         }
-=======
-        else if (leftStick.getRawButton(1)) {
-        	mainLift.set(DoubleSolenoid.Value.kForward);
-        	SmartDashboard.putBoolean("BigLift", true);
-        }
-        else if (rightStick.getRawButton(2)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO implement the limit switch
-        else solenoidControl(DoubleSolenoid.Value.kOff);
->>>>>>> origin/master
     }  
     ////End teleopPeriodic()////
     /**
      * @param value: The value to set all solenoids to (forward, reverse, or off);
      */
    public void solenoidControl(Value value) {
-<<<<<<< HEAD
     	mainLift.set(value);
-=======
-    	//mainLift.set(value);
->>>>>>> origin/master
     	sideLiftR.set(value);
     	sideLiftL.set(value);
     }
