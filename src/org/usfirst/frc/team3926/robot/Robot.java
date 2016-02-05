@@ -27,6 +27,10 @@ public class Robot extends IterativeRobot {
     Joystick rightStick;
     double rightInput;
     
+    DigitalInput topLimit;
+    DigitalInput botLimit;
+    int debounce = 0;
+    
     Compressor compressor;
     DoubleSolenoid mainLift; //The main giant cylinder
     DoubleSolenoid sideLiftR; //The right side cylinder
@@ -50,6 +54,9 @@ public class Robot extends IterativeRobot {
     	
     	leftStick = new Joystick(0);
     	rightStick = new Joystick(1);
+    	
+    	topLimit = new DigitalInput(9);
+    	botLimit = new DigitalInput(8);
     	
     	compressor = new Compressor(ID);
     	compressor.setClosedLoopControl(true);
@@ -76,22 +83,33 @@ public class Robot extends IterativeRobot {
         else if (leftStick.getRawButton(3)) armWheels.set(-1);
         else armWheels.set(0);
         
+        while(topLimit.get()) ++debounce;
+        if (!topLimit.get()) debounce = 0;
         
-        if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward); //TODO implement the limit switch
-        else if (rightStick.getRawButton(4)) solenoidControl(DoubleSolenoid.Value.kReverse); //TODO implement the limit switch
+        while(botLimit.get()) ++debounce;
+        if (!botLimit.get()) debounce = 0;
+        
+        if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward);
+        else if (rightStick.getRawButton(4)) solenoidControl(DoubleSolenoid.Value.kReverse);
         else if (leftStick.getRawButton(1)) mainLift.set(DoubleSolenoid.Value.kForward);
         else if (leftStick.getRawButton(4)) mainLift.set(DoubleSolenoid.Value.kReverse);
         else  {
         	solenoidControl(DoubleSolenoid.Value.kOff);
         	mainLift.set(DoubleSolenoid.Value.kOff);
         }
+        
+        if (debounce >= 20) {
+        	solenoidControl(DoubleSolenoid.Value.kOff);
+        	mainLift.set(DoubleSolenoid.Value.kOff);
+        }
+        
+        SmartDashboard.putInt("Debounce", debounce);
     }  
     ////End teleopPeriodic()////
     /**
      * @param value: The value to set all solenoids to (forward, reverse, or off);
      */
    public void solenoidControl(Value value) {
-    	mainLift.set(value);
     	sideLiftR.set(value);
     	sideLiftL.set(value);
     }
