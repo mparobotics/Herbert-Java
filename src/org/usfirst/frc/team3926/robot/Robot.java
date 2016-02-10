@@ -9,9 +9,8 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-	
-	
+
+
 public class Robot extends IterativeRobot {
 	Talon talon_FL;
 	Talon talon_BL;
@@ -20,49 +19,49 @@ public class Robot extends IterativeRobot {
     
     RobotDrive driveSystem;
     Talon armWheels;
-    Talon mysteryTalon; // talon of unknown origin 
     
     Joystick leftStick;
-    double leftInput;
     Joystick rightStick;
-    double rightInput;
-    
-    DigitalInput topLimit;
-    DigitalInput botLimit;
-    int debounce = 0;
-    
+
+    DriveFunctions driveControl;
+
+    DigitalInput topLimitSwitch;
+    DigitalInput botLimitSwitch;
+    LimitSwitchControl topLimit;
+    LimitSwitchControl botLimit;
+
+
     Compressor compressor;
     DoubleSolenoid mainLift; //The main giant cylinder
     DoubleSolenoid sideLiftR; //The right side cylinder
     DoubleSolenoid sideLiftL; //The left side cylinder 
-    
-    final int ID = 1; //ID number of the PCM (pneumatics control module)
-    final int liftForward = 5; //These need to be the channel numbers on the PCM (only like this so we can write other code)
-    final int liftReverse = 2;
-    final int rSideForward = 4;
-    final int rSideReverse = 3;
-    final int lSideForward = 6;
-    final int lSideReverse = 1;
-	
+
     public void robotInit() {
-    	talon_FL = new Talon(0);
-    	talon_BL = new Talon(1);
-    	talon_FR = new Talon(2);
-    	talon_BR = new Talon(3);
+    	talon_FL = new Talon(VariableStore.TALON_FRONT_LEFT);
+    	talon_BL = new Talon(VariableStore.TALON_BACK_LEFT);
+    	talon_FR = new Talon(VariableStore.TALON_FRONT_RIGHT);
+    	talon_BR = new Talon(VariableStore.TALON_BACK_RIGHT);
     	driveSystem = new RobotDrive(talon_FL, talon_BL, talon_FR, talon_BR);
-    	armWheels = new Talon(8);
+
+    	armWheels = new Talon(VariableStore.TALON_ARM_WHEEL_MOTOR);
     	
-    	leftStick = new Joystick(0);
-    	rightStick = new Joystick(1);
-    	
-    	topLimit = new DigitalInput(9);
-    	botLimit = new DigitalInput(8);
-    	
-    	compressor = new Compressor(ID);
-    	compressor.setClosedLoopControl(true);
-    	mainLift = new DoubleSolenoid(ID, liftForward, liftReverse);
-    	sideLiftR = new DoubleSolenoid(ID, rSideForward, rSideReverse);
-    	sideLiftL = new DoubleSolenoid(ID, lSideForward, lSideReverse);
+    	leftStick = new Joystick(VariableStore.LEFT_JOYSTICK_ID);
+    	rightStick = new Joystick(VariableStore.RIGHT_JOYSTICK_ID);
+
+        botLimitSwitch = new DigitalInput(VariableStore.BOTTOM_LIMIT);
+        topLimitSwitch = new DigitalInput(VariableStore.TOP_LIMIT);
+
+    	topLimit = new LimitSwitchControl(topLimitSwitch);
+    	botLimit = new LimitSwitchControl(botLimitSwitch);
+
+    	mainLift = new DoubleSolenoid(VariableStore.PCM_ID, VariableStore.MAIN_FORWARD_LIFT,
+                VariableStore.MAIN_REVERSE_LIFT);
+    	sideLiftR = new DoubleSolenoid(VariableStore.PCM_ID, VariableStore.RIGHT_SIDE_FORWARD_LIFT,
+                VariableStore.RIGHT_SIDE_REVERSE_LIFT);
+    	sideLiftL = new DoubleSolenoid(VariableStore.PCM_ID, VariableStore.LEFT_SIDE_FORWARD_LIFT,
+                VariableStore.LEFT_SIDE_REVERSE_LIFT);
+        compressor = new Compressor(VariableStore.PCM_ID);
+        compressor.setClosedLoopControl(true);
     } 
     ////End robotInit()////
 
@@ -72,74 +71,35 @@ public class Robot extends IterativeRobot {
     ////End autonomousPeriodic()////
 
     public void teleopPeriodic() {
-        rightInput = rightStickReturn();
-        leftInput = leftStickReturn();
+
+
+        driveControl.masterFunction();
         
-        if (leftStick.getRawButton(1)) rightInput = leftInput;
-        
-        driveSystem.tankDrive(leftInput, rightInput);
-        
-        if (leftStick.getRawButton(2)) armWheels.set(1);
-        else if (leftStick.getRawButton(3)) armWheels.set(-1);
-        else armWheels.set(0);
-        
-        while(topLimit.get()) ++debounce;
-        if (!topLimit.get()) debounce = 0;
-        
-        while(botLimit.get()) ++debounce;
-        if (!botLimit.get()) debounce = 0;
-        
-        if (rightStick.getRawButton(1)) solenoidControl(DoubleSolenoid.Value.kForward);
-        else if (rightStick.getRawButton(4)) solenoidControl(DoubleSolenoid.Value.kReverse);
-        else if (leftStick.getRawButton(1)) mainLift.set(DoubleSolenoid.Value.kForward);
-        else if (leftStick.getRawButton(4)) mainLift.set(DoubleSolenoid.Value.kReverse);
-        else  {
-        	solenoidControl(DoubleSolenoid.Value.kOff);
+        if (rightStick.getRawButton(1)) {
+            sideLifts(DoubleSolenoid.Value.kForward);
+        } else if (rightStick.getRawButton(4)) {
+            sideLifts(DoubleSolenoid.Value.kReverse);
+        } else if (leftStick.getRawButton(1) && !topLimit.getState()) {
+            mainLift.set(DoubleSolenoid.Value.kForward);
+        } else if (leftStick.getRawButton(4) && !botLimit.getState()) {
+            mainLift.set(DoubleSolenoid.Value.kReverse);
+        } else  {
+        	sideLifts(DoubleSolenoid.Value.kOff);
         	mainLift.set(DoubleSolenoid.Value.kOff);
         }
         
-        if (debounce >= 20) {
-        	solenoidControl(DoubleSolenoid.Value.kOff);
-        	mainLift.set(DoubleSolenoid.Value.kOff);
-        }
-        
-        SmartDashboard.putInt("Debounce", debounce);
+
     }  
     ////End teleopPeriodic()////
     /**
      * @param value: The value to set all solenoids to (forward, reverse, or off);
      */
-   public void solenoidControl(Value value) {
+   public void sideLifts(Value value) {
     	sideLiftR.set(value);
     	sideLiftL.set(value);
     }
-    ////End solenoidControl()////
-    
-    int debounceCounter = 0;
-    /**
-     * @param limitSwitch: The name of the limit switch which we are looking at
-     * @param joystick: The name of the joystick who's button we will check
-     * @param button: the button on the joystick which we will check
-     * @return If true, the limit switch is actually pressed and the joystick is actually pressed
-     */
-    public boolean debounceLimit(DigitalInput limitSwitch, Joystick joystick, int button) {
-    	boolean check = false;
-    	
-    	if (joystick.getRawButton(button)) {
-    		if (limitSwitch.get()) ++debounceCounter;
-    		else debounceCounter = 0;
-    		
-    		if (debounceCounter > 20) check = true;
-    		else check = false;
-    	}
-    	else {
-    		check = false;
-    		debounceCounter = 0;
-    	}
-    	
-    	return check;
-    }
-    ////End debounceLimit()////
+    ////End sideLifts()////
+
     public double leftStickReturn() {return leftStick.getY() * -1;}
     ////End leftStickReturn()////
     
