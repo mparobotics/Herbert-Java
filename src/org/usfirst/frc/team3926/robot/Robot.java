@@ -5,13 +5,9 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
-import com.ni.vision.NIVision;
-import com.ni.vision.NIVision.DrawMode;
-import com.ni.vision.NIVision.Image;
-import com.ni.vision.NIVision.ShapeMode;
-import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.Timer;
-
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.*;
 
 
 public class Robot extends IterativeRobot {
@@ -24,10 +20,14 @@ public class Robot extends IterativeRobot {
     double leftInput;
     Joystick rightStick;
     double rightInput;
-    
-    int session;
-    Image frame;
-    CameraServer server;
+    Joystick xBox;
+   Compressor compress;
+   DoubleSolenoid rightSolenoid;
+   DoubleSolenoid leftSolenoid;
+   DoubleSolenoid centerSolenoid;
+   boolean rightSolenoidBool = false;
+   boolean leftSolenoidBool = false;
+   boolean centerSolenoidBool = false;
    
     public void robotInit() {
        talon_FL = new Talon(0);
@@ -37,36 +37,34 @@ public class Robot extends IterativeRobot {
        driveSystem = new RobotDrive(talon_FL, talon_BL, talon_FR, talon_BR);
        leftStick = new Joystick(0);
        rightStick = new Joystick(1);
-    
-       session = NIVision.IMAQdxOpenCamera("cam0", NIVision.IMAQdxCameraControlMode.CameraControlModeController);
-       NIVision.IMAQdxConfigureGrab(session);
-       frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+       compress = new Compressor(1);
+       compress.setClosedLoopControl(true);
+       leftSolenoid = new DoubleSolenoid(1,4,3);
+       centerSolenoid = new DoubleSolenoid(1, 5, 2);
+       rightSolenoid = new DoubleSolenoid(1, 6, 1);
+       xBox = new Joystick(2);
+      
     }
    
     public void teleopPeriodic() {
     	leftInput = leftStick.getY();
     	rightInput = rightStick.getY();
-    	leftInput /= 2;
-    	rightInput /=2;
+    	//leftInput /= 2;
+    	//rightInput /=2;
     	driveSystem.tankDrive(leftInput, rightInput);
     	
-    	 	if (rightStick.getRawButton(1)){
+    	
+    	if (xBox.getRawButton(1) && !xBox.getRawButton(2)) {
+    		centerSolenoid.set(DoubleSolenoid.Value.kForward);
+    	} else if (!xBox.getRawButton(1) && xBox.getRawButton(2)) {
+    		centerSolenoid.set(DoubleSolenoid.Value.kReverse);
+    	} else {
+    		centerSolenoid.set(DoubleSolenoid.Value.kOff);
+    	}
+    	// solonoids 4 forward, 3 reverse ||  5 forward 2 reverse || big one 6 forward 1 reverse 
+    	
+    	 /*	if (rightStick.getRawButton(1)){
     	 		leftInput = rightInput;
-    	 	}
-    	 	webcam();
-    	 	
-    }
-    
-    
-    public void webcam() { 
-    	NIVision.Rect rect = new NIVision.Rect(200, 250, 100, 100);
-
-        NIVision.IMAQdxGrab(session, frame, 1);
-        NIVision.imaqDrawShapeOnImage(frame, frame, rect, DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
-        
-        CameraServer.getInstance().setImage(frame);
-        Timer.delay(0.005);
+    	 	}*/
     } 
- 
-  
 }
