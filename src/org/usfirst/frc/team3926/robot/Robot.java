@@ -55,16 +55,23 @@ public class Robot extends IterativeRobot {
     	
     	
     	if (xBox.getRawButton(1) && !xBox.getRawButton(2)) {
-    		centerSolenoid.set(DoubleSolenoid.Value.kForward);
+    		leftSolenoid.set(DoubleSolenoid.Value.kForward);
+    		rightSolenoid.set(DoubleSolenoid.Value.kForward);
     	} else if (!xBox.getRawButton(1) && xBox.getRawButton(2)) {
+    		leftSolenoid.set(DoubleSolenoid.Value.kReverse);
+    		rightSolenoid.set(DoubleSolenoid.Value.kReverse);
+    	} else {
+    		leftSolenoid.set(DoubleSolenoid.Value.kOff);
+    		rightSolenoid.set(DoubleSolenoid.Value.kOff);
+    	}
+    	// solonoids 4 forward, 3 reverse ||  5 forward 2 reverse || big one 6 forward 1 reverse 
+    	
+    	if (xBox.getRawButton(3) && !xBox.getRawButton(4)) {
+    		centerSolenoid.set(DoubleSolenoid.Value.kForward);
+    	} else if (!xBox.getRawButton(3) && xBox.getRawButton(4)) {
     		centerSolenoid.set(DoubleSolenoid.Value.kReverse);
     	} else {
     		centerSolenoid.set(DoubleSolenoid.Value.kOff);
     	}
-    	// solonoids 4 forward, 3 reverse ||  5 forward 2 reverse || big one 6 forward 1 reverse 
-    	
-    	 /*	if (rightStick.getRawButton(1)){
-    	 		leftInput = rightInput;
-    	 	}*/
     } 
 }
