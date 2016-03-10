@@ -51,7 +51,7 @@ public class Robot extends IterativeRobot {
     	rightInput = rightStick.getY();
     	//leftInput /= 2;
     	//rightInput /=2;
-    	driveSystem.tankDrive(leftInput, rightInput);
+    	driveSystem.tankDrive(leftInput * -1, rightInput * -1);
     	
     	
     	if (xBox.getRawButton(1) && !xBox.getRawButton(2)) {
